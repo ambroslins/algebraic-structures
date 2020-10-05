@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Prelude (IO (..), putStrLn)
 
 main :: IO ()
-main = someFunc
+main = putStrLn "not implemented"

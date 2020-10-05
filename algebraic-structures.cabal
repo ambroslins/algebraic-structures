@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3f846a661528f6f021c898f481f85f57f01c44276ff72e8ab86025bdb5e69931
+-- hash: 7b37159bd30453ae19454ed024948e6e5923e16006468e430168a0151c4174d0
 
 name:           algebraic-structures
 version:        0.1.0.0
@@ -28,11 +28,11 @@ source-repository head
 library
   exposed-modules:
       Algebra
-      Lib
   other-modules:
       Paths_algebraic_structures
   hs-source-dirs:
       src
+  default-extensions: NoImplicitPrelude
   build-depends:
       base >=4.7 && <5
   default-language: Haskell2010
@@ -43,6 +43,7 @@ executable algebraic-structures-exe
       Paths_algebraic_structures
   hs-source-dirs:
       app
+  default-extensions: NoImplicitPrelude
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       algebraic-structures
@@ -56,6 +57,7 @@ test-suite algebraic-structures-test
       Paths_algebraic_structures
   hs-source-dirs:
       test
+  default-extensions: NoImplicitPrelude
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       algebraic-structures
