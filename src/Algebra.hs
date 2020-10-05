@@ -10,21 +10,34 @@ module Algebra
     Int,
     Integer,
     Double,
+    Bool (..),
     Magma (..),
     Semigroup (..),
+    CommutativeSemigroup (..),
     (+),
     (*),
     Quasigroup (..),
     (-),
     (/),
+    IdentityElement (..),
+    zero,
+    one,
     Monoid (..),
     CommutativeMonoid (..),
     Loop (..),
     Group (..),
     Abelian (..),
+    Idempotent (..),
+    Semilattice (..),
+    (||),
+    (&&),
+    BoundSemilattice (..),
+    Lattice (..),
+    BoundLattice (..),
   )
 where
 
+import Data.Bool (Bool (..))
 import Data.Semigroup (Product (..), Sum (..))
 import GHC.Float (Double)
 import GHC.Int (Int)
@@ -34,10 +47,22 @@ import qualified Prelude as P
 
 type Nat = Word
 
+newtype Join a = Join {getJoin :: a}
+  deriving (P.Eq, P.Ord, P.Show, P.Read)
+
+newtype Meet a = Meet {getMeet :: a}
+  deriving (P.Eq, P.Ord, P.Show, P.Read)
+
 -- Magma
 
 class Magma m where
   magma :: m -> m -> m
+
+instance Magma (Join Bool) where
+  magma (Join x) (Join y) = Join (x P.|| y)
+
+instance Magma (Meet Bool) where
+  magma (Meet x) (Meet y) = Meet (x P.&& y)
 
 instance Magma (Sum Nat) where
   magma (Sum x) (Sum y) = Sum (x P.+ y)
@@ -73,11 +98,9 @@ instance Magma (Product Double) where
 
 class Magma m => Semigroup m
 
-(+) :: Semigroup (Sum m) => m -> m -> m
-x + y = getSum (Sum x `magma` Sum y)
+instance Semigroup (Join Bool)
 
-(*) :: Semigroup (Product m) => m -> m -> m
-x * y = getProduct (Product x `magma` Product y)
+instance Semigroup (Meet Bool)
 
 instance Semigroup (Sum Nat)
 
@@ -98,6 +121,40 @@ instance Semigroup (Product Int)
 instance Semigroup (Product Integer)
 
 instance Semigroup (Product Double)
+
+-- Commutative Semigroup
+
+class Semigroup m => CommutativeSemigroup m
+
+(+) :: CommutativeSemigroup (Sum m) => m -> m -> m
+x + y = getSum (Sum x `magma` Sum y)
+
+(*) :: CommutativeSemigroup (Product m) => m -> m -> m
+x * y = getProduct (Product x `magma` Product y)
+
+instance CommutativeSemigroup (Join Bool)
+
+instance CommutativeSemigroup (Meet Bool)
+
+instance CommutativeSemigroup (Sum Nat)
+
+instance CommutativeSemigroup (Sum Natural)
+
+instance CommutativeSemigroup (Sum Int)
+
+instance CommutativeSemigroup (Sum Integer)
+
+instance CommutativeSemigroup (Sum Double)
+
+instance CommutativeSemigroup (Product Nat)
+
+instance CommutativeSemigroup (Product Natural)
+
+instance CommutativeSemigroup (Product Int)
+
+instance CommutativeSemigroup (Product Integer)
+
+instance CommutativeSemigroup (Product Double)
 
 -- Quasigroup
 
@@ -140,6 +197,18 @@ instance Quasigroup (Product Double) where
 class Magma m => IdentityElement m where
   identityElement :: m
 
+zero :: IdentityElement (Sum a) => a
+zero = getSum identityElement
+
+one :: IdentityElement (Product a) => a
+one = getProduct identityElement
+
+instance IdentityElement (Join Bool) where
+  identityElement = Join False
+
+instance IdentityElement (Meet Bool) where
+  identityElement = Meet True
+
 instance IdentityElement (Sum Nat) where
   identityElement = Sum 0
 
@@ -172,55 +241,11 @@ instance IdentityElement (Product Double) where
 
 -- Monoid
 
-class (Semigroup m, IdentityElement m) => Monoid m where
-  power :: m -> Nat -> m
-  power x n = P.foldr magma identityElement (P.replicate (P.fromIntegral n) x)
-
-instance {-# OVERLAPPABLE #-} (Semigroup m, IdentityElement m) => Monoid m
-
-instance Monoid (Sum Nat)
-
-instance Monoid (Sum Natural)
-
-instance Monoid (Sum Int)
-
-instance Monoid (Sum Integer)
-
-instance Monoid (Sum Double)
-
-instance Monoid (Product Nat)
-
-instance Monoid (Product Natural)
-
-instance Monoid (Product Int)
-
-instance Monoid (Product Integer)
-
-instance Monoid (Product Double)
+type Monoid m = (Semigroup m, IdentityElement m)
 
 -- CommutativeMonoid
 
-class Monoid m => CommutativeMonoid m
-
-instance CommutativeMonoid (Sum Nat)
-
-instance CommutativeMonoid (Sum Natural)
-
-instance CommutativeMonoid (Sum Int)
-
-instance CommutativeMonoid (Sum Integer)
-
-instance CommutativeMonoid (Sum Double)
-
-instance CommutativeMonoid (Product Nat)
-
-instance CommutativeMonoid (Product Natural)
-
-instance CommutativeMonoid (Product Int)
-
-instance CommutativeMonoid (Product Integer)
-
-instance CommutativeMonoid (Product Double)
+type CommutativeMonoid m = (CommutativeSemigroup m, Monoid m)
 
 -- Loop
 
@@ -247,3 +272,37 @@ instance Group (Product Double) where
 -- Abelian group
 
 type Abelian a = (CommutativeMonoid a, Group a)
+
+-- Semiring
+
+type Semiring r = (CommutativeMonoid (Sum r), Monoid (Product r))
+
+-- Ring
+
+type Ring r = (Abelian (Sum r), Monoid (Product r))
+
+-- Idempotent
+
+class Magma m => Idempotent m
+
+instance Idempotent (Join Bool)
+
+instance Idempotent (Meet Bool)
+
+-- Semilattice
+
+type Semilattice l = (CommutativeSemigroup l, Idempotent l)
+
+(||) :: Semilattice (Join a) => a -> a -> a
+x || y = getJoin (Join x `magma` Join y)
+
+(&&) :: Semilattice (Meet a) => a -> a -> a
+x && y = getMeet (Meet x `magma` Meet y)
+
+type BoundSemilattice l = (CommutativeMonoid l, Idempotent l)
+
+-- Lattice
+
+type Lattice l = (Semilattice (Join l), Semilattice (Meet l))
+
+type BoundLattice l = (BoundSemilattice (Join l), BoundSemilattice (Meet l))
