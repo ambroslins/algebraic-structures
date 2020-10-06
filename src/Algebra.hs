@@ -1,6 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -281,6 +282,12 @@ type Semiring r = (CommutativeMonoid (Sum r), Monoid (Product r))
 
 type Ring r = (Abelian (Sum r), Monoid (Product r))
 
+type CommutativeRing r = (Abelian (Sum r), CommutativeMonoid (Product r))
+
+-- Field
+
+type Field f = (Abelian (Sum f), Abelian (Product f))
+
 -- Idempotent
 
 class Magma m => Idempotent m
@@ -306,3 +313,39 @@ type BoundSemilattice l = (CommutativeMonoid l, Idempotent l)
 type Lattice l = (Semilattice (Join l), Semilattice (Meet l))
 
 type BoundLattice l = (BoundSemilattice (Join l), BoundSemilattice (Meet l))
+
+-- Semimodule
+
+class (Semiring r, CommutativeMonoid m) => LeftSemimodule r m where
+  (.*) :: r -> m -> m
+
+class (Semiring r, CommutativeMonoid m) => RightSemimodule r m where
+  (*.) :: m -> r -> m
+
+type Semimodule r m = (LeftSemimodule r m, RightSemimodule r m)
+
+-- Module
+
+type LeftModule r m = (LeftSemimodule r m, Abelian m)
+
+type RighModule r m = (RightSemimodule r m, Abelian m)
+
+type Module r m = (Semimodule r m, Abelian m)
+
+-- Vector space
+
+type LeftVectorSpace f v = (LeftModule f v, Field f)
+
+type RighVectorSpace f v = (RighModule f v, Field f)
+
+type VectorSpace f v = (Module f v, Field f)
+
+-- Integral Domain
+
+class (Ring r) => IntegralDomain r
+
+instance IntegralDomain Int
+
+instance IntegralDomain Integer
+
+instance IntegralDomain Double
