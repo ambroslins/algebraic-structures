@@ -12,6 +12,8 @@ module Algebra
     Integer,
     Double,
     Bool (..),
+    Sum (..),
+    Product (..),
     Magma (..),
     Semigroup (..),
     CommutativeSemigroup (..),
