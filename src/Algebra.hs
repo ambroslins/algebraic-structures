@@ -6,15 +6,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Algebra
-  ( Nat,
-    Natural,
-    Int,
-    Integer,
-    Double,
-    Bool (..),
-    Sum (..),
-    Product (..),
-    Magma (..),
+  ( Magma (..),
     Semigroup (..),
     CommutativeSemigroup (..),
     (+),
@@ -32,31 +24,14 @@ module Algebra
     Abelian (..),
     Idempotent (..),
     Semilattice (..),
-    (||),
-    (&&),
     BoundSemilattice (..),
     Lattice (..),
     BoundLattice (..),
   )
 where
 
-import Data.Bool (Bool (..), (&&), (||))
-import Data.Function
-import Data.Functor
-import Data.Semigroup (Product (..), Sum (..))
-import Data.Word (Word)
-import GHC.Float (Double)
-import GHC.Int (Int)
-import GHC.Num (Integer, Natural)
-import Prelude
-  ( Eq (..),
-    Ord (..),
-    Read (..),
-    Show (..),
-  )
+import Algebra.Prelude
 import qualified Prelude as P
-
-type Nat = Word
 
 newtype Join a = Join {getJoin :: a}
   deriving (Eq, Ord, Show, Read)
@@ -272,16 +247,16 @@ class (Loop g, Monoid g) => Group g where
   inverse = (</> identityElement)
 
 instance Group (Sum Int) where
-  inverse = P.fmap P.negate
+  inverse = fmap P.negate
 
 instance Group (Sum Integer) where
-  inverse = P.fmap P.negate
+  inverse = fmap P.negate
 
 instance Group (Sum Double) where
-  inverse = P.fmap P.negate
+  inverse = fmap P.negate
 
 instance Group (Product Double) where
-  inverse = P.fmap P.recip
+  inverse = fmap P.recip
 
 -- Abelian group
 

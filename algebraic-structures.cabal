@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9508ceea99770f577eb9d08fede7816ba381ab28b5287655c4ed915f974cf25d
+-- hash: a4c483567a18eeea9a30fa843a55137f533f506ecae8535a7a538cafac0e5e14
 
 name:           algebraic-structures
 version:        0.1.0.0
@@ -28,17 +28,16 @@ source-repository head
 library
   exposed-modules:
       Algebra
-      Test.Algebra
+      Algebra.Prelude
+      Algebra.Properties
   other-modules:
       Paths_algebraic_structures
   hs-source-dirs:
       src
-  default-extensions: NoImplicitPrelude
+  default-extensions: NoImplicitPrelude FlexibleContexts
   build-depends:
-      QuickCheck
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , deepseq
-    , hspec
   default-language: Haskell2010
 
 executable algebraic-structures-exe
@@ -47,14 +46,12 @@ executable algebraic-structures-exe
       Paths_algebraic_structures
   hs-source-dirs:
       app
-  default-extensions: NoImplicitPrelude
+  default-extensions: NoImplicitPrelude FlexibleContexts
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      QuickCheck
-    , algebraic-structures
+      algebraic-structures
     , base >=4.7 && <5
     , deepseq
-    , hspec
   default-language: Haskell2010
 
 test-suite algebraic-structures-test
@@ -64,7 +61,7 @@ test-suite algebraic-structures-test
       Paths_algebraic_structures
   hs-source-dirs:
       test
-  default-extensions: NoImplicitPrelude
+  default-extensions: NoImplicitPrelude FlexibleContexts
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuickCheck
