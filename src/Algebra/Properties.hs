@@ -37,11 +37,11 @@ leftInverse x = inverse x <> x == identityElement
 rightInverse :: (Eq a, Group a) => a -> Bool
 rightInverse x = x <> inverse x == identityElement
 
-leftDistributive :: (Eq m, CommutativeSemigroup (Product m), CommutativeSemigroup (Sum m)) => m -> m -> m -> Bool
+leftDistributive :: (Eq m, Ring m) => m -> m -> m -> Bool
 leftDistributive x y z = x * (y + z) == (x * y) + (x * z)
 
-rightDistributive :: (Eq m, CommutativeSemigroup (Product m), CommutativeSemigroup (Sum m)) => m -> m -> m -> Bool
+rightDistributive :: (Eq m, Ring m) => m -> m -> m -> Bool
 rightDistributive x y z = (y + z) * x == (y * x) + (z * x)
 
-distributive :: (Eq m, CommutativeSemigroup (Product m), CommutativeSemigroup (Sum m)) => m -> m -> m -> Bool
+distributive :: (Eq m, Ring m) => m -> m -> m -> Bool
 distributive x y z = leftDistributive x y z && rightDistributive x y z

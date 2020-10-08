@@ -22,11 +22,21 @@ module Algebra
     Loop (..),
     Group (..),
     Abelian (..),
+    Semiring (..),
+    Ring (..),
+    CommutativeRing (..),
+    Field (..),
     Idempotent (..),
     Semilattice (..),
     BoundSemilattice (..),
     Lattice (..),
     BoundLattice (..),
+    LeftSemimodule (..),
+    RightSemimodule (..),
+    Semimodule (..),
+    LeftModule (..),
+    RighModule (..),
+    Module (..),
   )
 where
 
@@ -112,10 +122,10 @@ instance Semigroup (Product Double)
 
 class Semigroup m => CommutativeSemigroup m
 
-(+) :: CommutativeSemigroup (Sum m) => m -> m -> m
+(+) :: Semigroup (Sum m) => m -> m -> m
 x + y = getSum (Sum x <> Sum y)
 
-(*) :: CommutativeSemigroup (Product m) => m -> m -> m
+(*) :: Semigroup (Product m) => m -> m -> m
 x * y = getProduct (Product x <> Product y)
 
 instance CommutativeSemigroup (Join Bool)
