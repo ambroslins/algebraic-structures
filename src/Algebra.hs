@@ -40,62 +40,70 @@ module Algebra
   )
 where
 
-import Data.Bool (Bool (..))
+import Data.Bool (Bool (..), (&&), (||))
+import Data.Function
+import Data.Functor
 import Data.Semigroup (Product (..), Sum (..))
+import Data.Word (Word)
 import GHC.Float (Double)
 import GHC.Int (Int)
 import GHC.Num (Integer, Natural)
-import GHC.Word (Word)
+import Prelude
+  ( Eq (..),
+    Ord (..),
+    Read (..),
+    Show (..),
+  )
 import qualified Prelude as P
 
 type Nat = Word
 
 newtype Join a = Join {getJoin :: a}
-  deriving (P.Eq, P.Ord, P.Show, P.Read)
+  deriving (Eq, Ord, Show, Read)
 
 newtype Meet a = Meet {getMeet :: a}
-  deriving (P.Eq, P.Ord, P.Show, P.Read)
+  deriving (Eq, Ord, Show, Read)
 
 -- Magma
 
 class Magma m where
-  magma :: m -> m -> m
+  (<>) :: m -> m -> m
 
 instance Magma (Join Bool) where
-  magma (Join x) (Join y) = Join (x P.|| y)
+  Join x <> Join y = Join (x || y)
 
 instance Magma (Meet Bool) where
-  magma (Meet x) (Meet y) = Meet (x P.&& y)
+  Meet x <> Meet y = Meet (x && y)
 
 instance Magma (Sum Nat) where
-  magma (Sum x) (Sum y) = Sum (x P.+ y)
+  Sum x <> Sum y = Sum (x P.+ y)
 
 instance Magma (Sum Natural) where
-  magma (Sum x) (Sum y) = Sum (x P.+ y)
+  Sum x <> Sum y = Sum (x P.+ y)
 
 instance Magma (Sum Int) where
-  magma (Sum x) (Sum y) = Sum (x P.+ y)
+  Sum x <> Sum y = Sum (x P.+ y)
 
 instance Magma (Sum Integer) where
-  magma (Sum x) (Sum y) = Sum (x P.+ y)
+  Sum x <> Sum y = Sum (x P.+ y)
 
 instance Magma (Sum Double) where
-  magma (Sum x) (Sum y) = Sum (x P.+ y)
+  Sum x <> Sum y = Sum (x P.+ y)
 
 instance Magma (Product Nat) where
-  magma (Product x) (Product y) = Product (x P.* y)
+  Product x <> Product y = Product (x P.* y)
 
 instance Magma (Product Natural) where
-  magma (Product x) (Product y) = Product (x P.* y)
+  Product x <> Product y = Product (x P.* y)
 
 instance Magma (Product Int) where
-  magma (Product x) (Product y) = Product (x P.* y)
+  Product x <> Product y = Product (x P.* y)
 
 instance Magma (Product Integer) where
-  magma (Product x) (Product y) = Product (x P.* y)
+  Product x <> Product y = Product (x P.* y)
 
 instance Magma (Product Double) where
-  magma (Product x) (Product y) = Product (x P.* y)
+  Product x <> Product y = Product (x P.* y)
 
 -- Semigroup
 
@@ -130,10 +138,10 @@ instance Semigroup (Product Double)
 class Semigroup m => CommutativeSemigroup m
 
 (+) :: CommutativeSemigroup (Sum m) => m -> m -> m
-x + y = getSum (Sum x `magma` Sum y)
+x + y = getSum (Sum x <> Sum y)
 
 (*) :: CommutativeSemigroup (Product m) => m -> m -> m
-x * y = getProduct (Product x `magma` Product y)
+x * y = getProduct (Product x <> Product y)
 
 instance CommutativeSemigroup (Join Bool)
 
@@ -162,38 +170,41 @@ instance CommutativeSemigroup (Product Double)
 -- Quasigroup
 
 class Magma m => Quasigroup m where
-  leftDivision :: m -> m -> m
-  rightDivistion :: m -> m -> m
+  -- | left division
+  (<\>) :: m -> m -> m
+
+  -- | right division
+  (</>) :: m -> m -> m
 
 (-) :: Quasigroup (Sum a) => a -> a -> a
-x - y = getSum (Sum x `rightDivistion` Sum y)
+x - y = getSum (Sum x </> Sum y)
 
 (/) :: Quasigroup (Product a) => a -> a -> a
-x / y = getProduct (Product x `rightDivistion` Product y)
+x / y = getProduct (Product x </> Product y)
 
 instance Quasigroup (Sum Nat) where
-  leftDivision (Sum x) (Sum y) = Sum (y P.- x)
-  rightDivistion (Sum x) (Sum y) = Sum (x P.- y)
+  Sum x <\> Sum y = Sum (y P.- x)
+  Sum x </> Sum y = Sum (x P.- y)
 
 instance Quasigroup (Sum Natural) where
-  leftDivision (Sum x) (Sum y) = Sum (y P.- x)
-  rightDivistion (Sum x) (Sum y) = Sum (x P.- y)
+  Sum x <\> Sum y = Sum (y P.- x)
+  Sum x </> Sum y = Sum (x P.- y)
 
 instance Quasigroup (Sum Int) where
-  leftDivision (Sum x) (Sum y) = Sum (y P.- x)
-  rightDivistion (Sum x) (Sum y) = Sum (x P.- y)
+  Sum x <\> Sum y = Sum (y P.- x)
+  Sum x </> Sum y = Sum (x P.- y)
 
 instance Quasigroup (Sum Integer) where
-  leftDivision (Sum x) (Sum y) = Sum (y P.- x)
-  rightDivistion (Sum x) (Sum y) = Sum (x P.- y)
+  Sum x <\> Sum y = Sum (y P.- x)
+  Sum x </> Sum y = Sum (x P.- y)
 
 instance Quasigroup (Sum Double) where
-  leftDivision (Sum x) (Sum y) = Sum (y P.- x)
-  rightDivistion (Sum x) (Sum y) = Sum (x P.- y)
+  Sum x <\> Sum y = Sum (y P.- x)
+  Sum x </> Sum y = Sum (x P.- y)
 
 instance Quasigroup (Product Double) where
-  leftDivision (Product x) (Product y) = Product (y P./ x)
-  rightDivistion (Product x) (Product y) = Product (x P./ y)
+  Product x <\> Product y = Product (y P./ x)
+  Product x </> Product y = Product (x P./ y)
 
 -- IdentityElement
 
@@ -258,7 +269,7 @@ type Loop l = (Quasigroup l, IdentityElement l)
 
 class (Loop g, Monoid g) => Group g where
   inverse :: g -> g
-  inverse = rightDivistion identityElement
+  inverse = (</> identityElement)
 
 instance Group (Sum Int) where
   inverse = P.fmap P.negate
@@ -301,12 +312,6 @@ instance Idempotent (Meet Bool)
 -- Semilattice
 
 type Semilattice l = (CommutativeSemigroup l, Idempotent l)
-
-(||) :: Semilattice (Join a) => a -> a -> a
-x || y = getJoin (Join x `magma` Join y)
-
-(&&) :: Semilattice (Meet a) => a -> a -> a
-x && y = getMeet (Meet x `magma` Meet y)
 
 type BoundSemilattice l = (CommutativeMonoid l, Idempotent l)
 
