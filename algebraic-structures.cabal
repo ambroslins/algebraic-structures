@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a4c483567a18eeea9a30fa843a55137f533f506ecae8535a7a538cafac0e5e14
+-- hash: 43aa6b93b49aa867e54ce34d749e57a5328e0147c5f0d690f29fa498c98fada2
 
 name:           algebraic-structures
 version:        0.1.0.0
@@ -58,6 +58,7 @@ test-suite algebraic-structures-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      AlgebraSpec
       Paths_algebraic_structures
   hs-source-dirs:
       test
