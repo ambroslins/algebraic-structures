@@ -1,0 +1,13 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "algebraic-structures:lib"
+
+    - path: "./app/Main.hs"
+      component: "algebraic-structures:exe:algebraic-structures-exe"
+
+    - path: "./app/Paths_algebraic_structures.hs"
+      component: "algebraic-structures:exe:algebraic-structures-exe"
+
+    - path: "./test"
+      component: "algebraic-structures:test:algebraic-structures-test"
