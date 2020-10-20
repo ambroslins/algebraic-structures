@@ -1,3 +1,5 @@
+{-# LANGUAGE MonoLocalBinds #-}
+
 module Algebra.Properties where
 
 import Algebra

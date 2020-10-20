@@ -1,6 +1,6 @@
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
@@ -240,15 +240,21 @@ instance IdentityElement (Product Double) where
 
 -- Monoid
 
-type Monoid m = (Semigroup m, IdentityElement m)
+class (Semigroup m, IdentityElement m) => Monoid m
+
+instance (Semigroup m, IdentityElement m) => Monoid m
 
 -- CommutativeMonoid
 
-type CommutativeMonoid m = (CommutativeSemigroup m, Monoid m)
+class (CommutativeSemigroup m, Monoid m) => CommutativeMonoid m
+
+instance (CommutativeSemigroup m, Monoid m) => CommutativeMonoid m
 
 -- Loop
 
-type Loop l = (Quasigroup l, IdentityElement l)
+class (Quasigroup l, IdentityElement l) => Loop l
+
+instance (Quasigroup l, IdentityElement l) => Loop l
 
 -- Group
 
@@ -270,21 +276,31 @@ instance Group (Product Double) where
 
 -- Abelian group
 
-type Abelian a = (CommutativeMonoid a, Group a)
+class (CommutativeMonoid a, Group a) => Abelian a
+
+instance (CommutativeMonoid a, Group a) => Abelian a
 
 -- Semiring
 
-type Semiring r = (CommutativeMonoid (Sum r), Monoid (Product r))
+class (CommutativeMonoid (Sum r), Monoid (Product r)) => Semiring r
+
+instance (CommutativeMonoid (Sum r), Monoid (Product r)) => Semiring r
 
 -- Ring
 
-type Ring r = (Abelian (Sum r), Monoid (Product r))
+class (Abelian (Sum r), Monoid (Product r)) => Ring r
 
-type CommutativeRing r = (Abelian (Sum r), CommutativeMonoid (Product r))
+instance (Abelian (Sum r), Monoid (Product r)) => Ring r
+
+class (Abelian (Sum r), CommutativeMonoid (Product r)) => CommutativeRing r
+
+instance (Abelian (Sum r), CommutativeMonoid (Product r)) => CommutativeRing r
 
 -- Field
 
-type Field f = (Abelian (Sum f), Abelian (Product f))
+class (Abelian (Sum f), Abelian (Product f)) => Field f
+
+instance (Abelian (Sum f), Abelian (Product f)) => Field f
 
 -- Idempotent
 
@@ -296,15 +312,23 @@ instance Idempotent (Meet Bool)
 
 -- Semilattice
 
-type Semilattice l = (CommutativeSemigroup l, Idempotent l)
+class (CommutativeSemigroup l, Idempotent l) => Semilattice l
 
-type BoundSemilattice l = (CommutativeMonoid l, Idempotent l)
+instance (CommutativeSemigroup l, Idempotent l) => Semilattice l
+
+class (CommutativeMonoid l, Idempotent l) => BoundSemilattice l
+
+instance (CommutativeMonoid l, Idempotent l) => BoundSemilattice l
 
 -- Lattice
 
-type Lattice l = (Semilattice (Join l), Semilattice (Meet l))
+class (Semilattice (Join l), Semilattice (Meet l)) => Lattice l
 
-type BoundLattice l = (BoundSemilattice (Join l), BoundSemilattice (Meet l))
+instance (Semilattice (Join l), Semilattice (Meet l)) => Lattice l
+
+class (BoundSemilattice (Join l), BoundSemilattice (Meet l)) => BoundLattice l
+
+instance (BoundSemilattice (Join l), BoundSemilattice (Meet l)) => BoundLattice l
 
 -- Semimodule
 
@@ -314,30 +338,34 @@ class (Semiring r, CommutativeMonoid m) => LeftSemimodule r m where
 class (Semiring r, CommutativeMonoid m) => RightSemimodule r m where
   (*.) :: m -> r -> m
 
-type Semimodule r m = (LeftSemimodule r m, RightSemimodule r m)
+class (LeftSemimodule r m, RightSemimodule r m) => Semimodule r m
+
+instance (LeftSemimodule r m, RightSemimodule r m) => Semimodule r m
 
 -- Module
 
-type LeftModule r m = (LeftSemimodule r m, Abelian m)
+class (LeftSemimodule r m, Abelian m) => LeftModule r m
 
-type RighModule r m = (RightSemimodule r m, Abelian m)
+instance (LeftSemimodule r m, Abelian m) => LeftModule r m
 
-type Module r m = (Semimodule r m, Abelian m)
+class (RightSemimodule r m, Abelian m) => RighModule r m
+
+instance (RightSemimodule r m, Abelian m) => RighModule r m
+
+class (Semimodule r m, Abelian m) => Module r m
+
+instance (Semimodule r m, Abelian m) => Module r m
 
 -- Vector space
 
-type LeftVectorSpace f v = (LeftModule f v, Field f)
+class (LeftModule f v, Field f) => LeftVectorSpace f v
 
-type RighVectorSpace f v = (RighModule f v, Field f)
+instance (LeftModule f v, Field f) => LeftVectorSpace f v
 
-type VectorSpace f v = (Module f v, Field f)
+class (RighModule f v, Field f) => RighVectorSpace f v
 
--- Integral Domain
+instance (RighModule f v, Field f) => RighVectorSpace f v
 
-class (Ring r) => IntegralDomain r
+class (Module f v, Field f) => VectorSpace f v
 
-instance IntegralDomain Int
-
-instance IntegralDomain Integer
-
-instance IntegralDomain Double
+instance (Module f v, Field f) => VectorSpace f v
